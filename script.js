@@ -57,11 +57,11 @@ function selectVideo(index){
  thumbs.querySelectorAll('button').forEach((b,i)=>{b.classList.toggle('active',i===index);b.setAttribute('aria-pressed',String(i===index));});
 }
 function pauseSlideshow(){clearInterval(slideshow);slideshow=null;}
-function startSlideshow(){pauseSlideshow();if(mode!=='Zdjęcia'||document.hidden||document.querySelector('#preview').open||matchMedia('(prefers-reduced-motion: reduce)').matches||hero.matches(':hover')||strip.matches(':hover')||hero.contains(document.activeElement)||strip.contains(document.activeElement))return;slideshow=setInterval(()=>selectImage((current+1)%photos.length),3000);}
+function startSlideshow(){pauseSlideshow();if(mode!=='Zdjęcia'||document.hidden||document.querySelector('#preview').open||matchMedia('(prefers-reduced-motion: reduce)').matches||(matchMedia('(hover:hover)').matches&&(hero.matches(':hover')||strip.matches(':hover')))||hero.contains(document.activeElement)||strip.contains(document.activeElement))return;slideshow=setInterval(()=>selectImage((current+1)%photos.length),3000);}
 function setMode(next){
  pauseSlideshow();mode=next;hero.dataset.mode=mode;
  frame.removeAttribute('src');localVideo.pause();frame.hidden=mode!=='Wideo';localVideo.hidden=mode!=='3D';heroImage.hidden=mode!=='Zdjęcia';expand.hidden=mode!=='Zdjęcia';
- hero.querySelector('.brand').hidden=mode!=='Zdjęcia';hero.querySelector('.new').hidden=mode!=='Zdjęcia';
+ // Product badges belong to the title and remain visible in every gallery mode.
  document.querySelectorAll('[role=tab]').forEach(t=>{t.setAttribute('aria-selected',String(t.dataset.mode===mode));t.tabIndex=t.dataset.mode===mode?0:-1;});
  renderThumbnails();if(mode==='3D'){localVideo.muted=true;localVideo.play().catch(()=>{});}if(mode==='Wideo')selectVideo(videoIndex);if(mode==='Zdjęcia'){selectImage(current);startSlideshow();}
 }
@@ -79,7 +79,12 @@ expand.addEventListener('click',pauseSlideshow);
 window.addEventListener('resize',()=>{if(mode==='Zdjęcia')scrollToPage(photoPage);});
 setMode('Zdjęcia');
 
-document.querySelectorAll('.variant').forEach((button,i)=>{button.classList.remove('selected');button.setAttribute('aria-expanded','false');button.removeAttribute('aria-pressed');button.setAttribute('aria-label',button.querySelector('strong').textContent);button.querySelector('strong').id='variant-name-'+i;button.setAttribute('aria-controls','variant-name-'+i);button.addEventListener('click',()=>{const open=button.getAttribute('aria-expanded')!=='true';document.querySelectorAll('.variant').forEach(v=>{v.setAttribute('aria-expanded',String(v===button&&open));v.classList.toggle('selected',v===button&&open);});});});
+document.querySelectorAll('.variant').forEach((button,i)=>{
+ const isCurrent=i===0;button.classList.toggle('selected',isCurrent);button.setAttribute('aria-pressed',String(isCurrent));button.removeAttribute('aria-expanded');button.removeAttribute('aria-controls');
+ button.setAttribute('aria-label',button.querySelector('strong').textContent.trim()+(isCurrent?' — wybrany model':''));
+ if(isCurrent){button.setAttribute('aria-current','true');}
+ else button.addEventListener('click',()=>{const toast=document.querySelector('.toast');toast.textContent='Podgląd projektu — przejście do tego modelu nie jest jeszcze podłączone.';toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),2600);});
+});
 const quantity=document.querySelector('#quantity');
 function normalize(){quantity.value=Math.max(1,Math.min(99,parseInt(quantity.value,10)||1));updateTotal();}
 function updateTotal(){refreshVariantPurchase();}
@@ -88,15 +93,14 @@ document.querySelector('#decrease').addEventListener('click',()=>{quantity.value
 document.querySelectorAll('.option input').forEach(c=>c.addEventListener('change',updateTotal));
 document.querySelectorAll('.accessory button[data-price]').forEach(b=>b.addEventListener('click',()=>{const selected=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(selected));b.textContent=selected?'DODANO ✓':'DODAJ';updateTotal();}));
 const dialog=document.querySelector('#preview');document.querySelector('.expand').addEventListener('click',()=>dialog.showModal());document.querySelector('.close-preview').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
-let toastTimer;document.querySelectorAll('.cart-button,.text-button,.product-footer button,.header nav button,.header-tools .desktop-tool,.header-tools button[aria-label="Szukaj"]').forEach(b=>b.addEventListener('click',()=>{const toast=document.querySelector('.toast');toast.textContent='Podgląd projektu — ta akcja nie jest jeszcze podłączona.';toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),2400);}));
+let toastTimer;document.querySelectorAll('.cart-button,.text-button,.product-footer button:not(.share-product),.header nav button,.header-tools .desktop-tool,.header-tools button[aria-label="Szukaj"]').forEach(b=>b.addEventListener('click',()=>{const toast=document.querySelector('.toast');toast.textContent='Podgląd projektu — ta akcja nie jest jeszcze podłączona.';toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),2400);}));
 
 const carousel=document.querySelector('#accessories');
 function moveAccessories(direction){const card=carousel.querySelector('.accessory');carousel.scrollBy({left:direction*(card.getBoundingClientRect().width+8)*3,behavior:'smooth'});}
 document.querySelector('.next-accessories').addEventListener('click',()=>moveAccessories(1));document.querySelector('.previous-accessories').addEventListener('click',()=>moveAccessories(-1));
 function updateAccessoryArrows(){document.querySelector('.previous-accessories').disabled=carousel.scrollLeft<2;document.querySelector('.next-accessories').disabled=carousel.scrollLeft>=carousel.scrollWidth-carousel.clientWidth-2;}carousel.addEventListener('scroll',updateAccessoryArrows,{passive:true});window.addEventListener('resize',updateAccessoryArrows);requestAnimationFrame(updateAccessoryArrows);
-document.querySelector('.jump-bottom').addEventListener('click',()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'}));
-const floating=document.querySelector('.floating-purchase');const cartButton=document.querySelector('.cart-button');function updateFloating(){floating.hidden=cartButton.getBoundingClientRect().bottom>=0;const totalText=money(configuredTotal());if(document.querySelector('.floating-price').textContent!==totalText)document.querySelector('.floating-price').textContent=totalText;}window.addEventListener('scroll',updateFloating,{passive:true});window.addEventListener('resize',updateFloating);new MutationObserver(updateFloating).observe(cartButton,{childList:true,characterData:true,subtree:true});updateFloating();
-document.querySelectorAll('.demo-action').forEach(b=>b.addEventListener('click',()=>{const toast=document.querySelector('.toast');toast.textContent='Podgląd projektu — ta akcja nie jest jeszcze podłączona.';toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),2400);}));
+const floating=document.querySelector('.floating-purchase');const cartButton=document.querySelector('.cart-button');function updateFloating(){floating.hidden=matchMedia('(max-width:850px)').matches?false:cartButton.getBoundingClientRect().bottom>=0;const totalText=money(configuredTotal()).replace('zł',selectedVariant==='es'?'PLN':'zł');if(document.querySelector('.floating-price').textContent!==totalText)document.querySelector('.floating-price').textContent=totalText;}window.addEventListener('scroll',updateFloating,{passive:true});window.addEventListener('resize',updateFloating);new MutationObserver(updateFloating).observe(cartButton,{childList:true,characterData:true,subtree:true});updateFloating();
+document.querySelectorAll('.demo-action:not(.share-product)').forEach(b=>b.addEventListener('click',()=>{const toast=document.querySelector('.toast');toast.textContent='Podgląd projektu — ta akcja nie jest jeszcze podłączona.';toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),2400);}));
 document.querySelectorAll('.service-help button').forEach(button=>button.addEventListener('click',()=>{const parent=button.parentElement;const open=parent.classList.toggle('help-open');button.setAttribute('aria-expanded',String(open));}));
 
 const hamburger=document.querySelector('.hamburger');
@@ -126,27 +130,6 @@ zoomStage.addEventListener('pointerleave',()=>lens.style.display='none');
 zoomStage.addEventListener('dblclick',e=>{if(e.pointerType==='mouse')return;zoomScale=zoomScale>1?1:2;zoomX=zoomScale>1?-zoomStage.clientWidth/2:0;zoomY=zoomScale>1?-zoomStage.clientHeight/2:0;paintZoom();});
 window.addEventListener('resize',paintZoom);
 
-// Mobile feature carousel: one active feature and a muted preview of the next.
-const featureSlider=document.querySelector('.specs');
-featureSlider.setAttribute('aria-label','Najważniejsze cechy produktu');
-const originalFeatures=[...featureSlider.children];
-originalFeatures.forEach((item,i)=>item.dataset.featureIndex=i);
-const featureClone=originalFeatures[0].cloneNode(true);featureClone.setAttribute('aria-hidden','true');featureClone.inert=true;featureClone.dataset.clone='true';featureSlider.append(featureClone);
-let featureIndex=0,featureTimer,featureSettle,featureHovered=false,featureTouching=false;
-const mobileFeatures=()=>matchMedia('(max-width:850px)').matches;
-function markFeature(index){[...featureSlider.children].forEach((item,i)=>item.classList.toggle('feature-active',i===index));}
-function featureStep(){return featureSlider.children[1].offsetLeft-featureSlider.children[0].offsetLeft;}
-function showFeature(index,smooth=true){featureIndex=index;markFeature(index);featureSlider.scrollTo({left:index*featureStep(),behavior:smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant'});}
-function stopFeatureTimer(){clearInterval(featureTimer);featureTimer=null;}
-function startFeatureTimer(){stopFeatureTimer();if(!mobileFeatures()||document.hidden||featureHovered||featureTouching||featureSlider.contains(document.activeElement)||document.querySelector('#preview').open||matchMedia('(prefers-reduced-motion: reduce)').matches)return;featureTimer=setInterval(()=>{if(featureIndex>=originalFeatures.length){showFeature(0,false);requestAnimationFrame(()=>requestAnimationFrame(()=>showFeature(1)));}else showFeature(featureIndex+1);},3000);}
-featureSlider.addEventListener('scroll',()=>{if(!mobileFeatures())return;const index=Math.round(featureSlider.scrollLeft/featureStep());markFeature(index);clearTimeout(featureSettle);featureSettle=setTimeout(()=>{featureIndex=index;if(index===originalFeatures.length)showFeature(0,false);},180);},{passive:true});
-featureSlider.addEventListener('mouseenter',()=>{featureHovered=true;stopFeatureTimer();});featureSlider.addEventListener('mouseleave',()=>{featureHovered=false;startFeatureTimer();});
-featureSlider.addEventListener('touchstart',()=>{featureTouching=true;stopFeatureTimer();},{passive:true});featureSlider.addEventListener('touchend',()=>{featureTouching=false;featureHovered=false;startFeatureTimer();},{passive:true});featureSlider.addEventListener('touchcancel',()=>{featureTouching=false;startFeatureTimer();},{passive:true});
-featureSlider.addEventListener('focusin',stopFeatureTimer);featureSlider.addEventListener('focusout',()=>setTimeout(startFeatureTimer,0));
-document.addEventListener('visibilitychange',startFeatureTimer);document.querySelector('.expand').addEventListener('click',stopFeatureTimer);document.querySelector('#preview').addEventListener('close',startFeatureTimer);
-function refreshFeatures(){stopFeatureTimer();if(mobileFeatures()){showFeature(Math.min(featureIndex,originalFeatures.length-1),false);startFeatureTimer();}else{featureSlider.scrollLeft=0;markFeature(-1);}}
-window.addEventListener('resize',refreshFeatures);refreshFeatures();
-
 // Preview variants. Edit dates and outlet condition here when final details are known.
 const variantPreviewConfig={shippingDate:'Wysyłka od 01.01.2027.',outletCondition:'Stan produktu: powystawowy / po zwrocie — do uzupełnienia.'};
 const variantLabels={new:'NOWOŚĆ',outlet:'OUTLET',preorder:'PRZEDSPRZEDAŻ',unavailable:'BRAK NA STANIE',es:'CERTIFICADO EN ESPAÑA'};
@@ -163,10 +146,13 @@ function refreshVariantPurchase(){
  document.querySelector('.quantity').hidden=selectedVariant==='unavailable';
  document.querySelector('.payment-methods').hidden=selectedVariant==='unavailable';
  document.querySelector('.preorder-shipping').hidden=selectedVariant!=='preorder';
+ document.querySelector('.installments').hidden=selectedVariant==='unavailable';
+ document.querySelector('.installment-price-line').hidden=selectedVariant==='unavailable';
  document.querySelector('.floating-cart').classList.toggle('preorder-purchase',selectedVariant==='preorder');
  document.querySelector('.floating-cart').setAttribute('aria-label',selectedVariant==='unavailable'?'Powiadom mnie o dostępności':selectedVariant==='preorder'?'Kup w przedsprzedaży':'Dodaj do koszyka');
  document.querySelector('.floating-cart img').hidden=selectedVariant==='unavailable';
  document.querySelector('.availability-symbol').hidden=selectedVariant!=='unavailable';
+ document.querySelector('.mobile-cart-label').textContent=selectedVariant==='unavailable'?'Powiadom o dostępności':selectedVariant==='preorder'?'Kup w przedsprzedaży':'Dodaj do koszyka';
  updateFloating();
 }
 function applyPreviewVariant(value){
@@ -176,15 +162,23 @@ function applyPreviewVariant(value){
  document.querySelector('.status-tooltip').textContent=value==='preorder'?variantPreviewConfig.shippingDate:variantPreviewConfig.outletCondition;
  document.querySelector('.dgt-info').hidden=value!=='es';
  document.querySelectorAll('[data-preview-variant]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.previewVariant===value)));
- refreshVariantPurchase();translatePage();variantPanel.close();
+ refreshVariantPurchase();translatePage();document.dispatchEvent(new Event('productlanguagechange'));variantPanel.close();
 }
 document.querySelectorAll('[data-preview-variant]').forEach(button=>button.addEventListener('click',()=>applyPreviewVariant(button.dataset.previewVariant)));
 document.querySelector('.status-help button').addEventListener('click',()=>document.querySelector('.status-help').classList.toggle('help-open'));
 const translations={
-'Wybierz wariant':'Elegir variante','Zmień wariant':'Cambiar variante','Wariant podglądu':'Variante de vista previa','Zamknij wybór wariantu':'Cerrar selector de variantes','Nowość':'Novedad','Outlet':'Outlet','Przedsprzedaż':'Preventa','Brak na stanie':'Agotado',
+'Opinie przykładowe':'Opiniones de ejemplo',
+
+'Opinie klientów':'Opiniones de clientes','Przykładowe opinie do podglądu — treści wygenerowane, nie pochodzą z TrustMate.':'Opiniones de ejemplo para la vista previa: textos generados, no proceden de TrustMate.','Poprzednia opinia':'Opinión anterior','Następna opinia':'Opinión siguiente',
+
+'Opcje produktu':'Opciones del producto','Zapisz':'Guardar','Zapisano':'Guardado','W porównaniu':'En la comparación','Dodano do porównania.':'Añadido a la comparación.','Usunięto z porównania.':'Eliminado de la comparación.','Zapisano produkt.':'Producto guardado.','Usunięto z zapisanych.':'Producto eliminado de los guardados.','Skopiowano link do produktu.':'Enlace del producto copiado.','Udostępnianie linku jest dostępne po uruchomieniu strony na serwerze.':'El enlace se puede compartir cuando la página se ejecute en un servidor.','lub':'o','× 30 rat':'× 30 cuotas',
+
+'Wybierz swój model':'Elige tu modelo','Wybrany model':'Modelo seleccionado','Wygodnie na raty z':'Paga a plazos con','Rozłóż płatność na raty. Warunki dostępne przy wyborze płatności.':'Fracciona tu pago. Consulta las condiciones al elegir el método de pago.','Wygodne i bezpieczne płatności':'Pagos cómodos y seguros',
+
+'Powiadom o dostępności':'Avísame cuando esté disponible','Zakup produktu':'Comprar producto','Pomoc i informacje':'Ayuda e información','Wybierz wariant':'Elegir variante','Zmień wariant':'Cambiar variante','Wariant podglądu':'Variante de vista previa','Zamknij wybór wariantu':'Cerrar selector de variantes','Nowość':'Novedad','Outlet':'Outlet','Przedsprzedaż':'Preventa','Brak na stanie':'Agotado',
 'Hulajnogi elektryczne':'Patinetes eléctricos','Hulajnogi Elektryczne':'Patinetes eléctricos','Pojazdy':'Vehículos','Bestsellery':'Más vendidos','Części':'Recambios','Akcesoria':'Accesorios','Usługi':'Servicios','Smart home':'Hogar inteligente',
 'Wysyłka w 48h':'Envío en 48 h','Szeroki wybór części':'Amplia selección de recambios','Profesjonalny serwis':'Servicio técnico profesional','Wsparcie w wyborze sprzętu':'Asesoramiento para elegir tu equipo',
-'Galeria i funkcje':'Galería y características','Oferta Kamikaze':'Oferta Kamikaze','Oferta marki Kamikaze':'Oferta de la marca Kamikaze','ZOBACZ OFERTĘ':'VER OFERTA','NOWOŚĆ':'NOVEDAD','PRZEDSPRZEDAŻ':'PREVENTA','BRAK NA STANIE':'AGOTADO','Zdjęcia':'Fotos','Wideo':'Vídeo','Rodzaj podglądu':'Tipo de vista','Miniatury':'Miniaturas',
+'Galeria i funkcje':'Galería y características','Oferta Kamikaze':'Oferta Kamikaze','Oferta marki Kamikaze':'Oferta de la marca Kamikaze','ZOBACZ OFERTĘ':'VER OFERTA','NOWOŚĆ':'NOVEDAD','PRZEDSPRZEDAŻ':'PREVENTA','BRAK NA STANIE':'AGOTADO','Kliknij aby powiększyć':'Haz clic para ampliar','Zdjęcia':'Fotos','Wideo':'Vídeo','Rodzaj podglądu':'Tipo de vista','Miniatury':'Miniaturas',
 'MOC NOMINALNA':'POTENCIA NOMINAL','Moc nominalna':'Potencia nominal','OPONY BEZDĘTKOWE':'NEUMÁTICOS TUBELESS','Opony bezdętkowe':'Neumáticos tubeless','ZASIĘG':'AUTONOMÍA','Zasięg':'Autonomía','Do 80 km':'Hasta 80 km','BATERIA':'BATERÍA','Bateria':'Batería','ZINTEGROWANE':'INTEGRADOS','Kierunkowskazy':'Intermitentes','WAGA':'PESO','Waga':'Peso','ZOBACZ WIĘCEJ':'VER MÁS',
 'Konfiguracja produktu':'Configuración del producto','Stworzona dla tych, którzy oczekują więcej.':'Creado para quienes esperan más.','Opinie (11)':'Opiniones (11)','Sprawdź inne warianty':'Descubre otras variantes','Zdjęcie wariantu':'Imagen de la variante','Liczba sztuk':'Cantidad','Zmniejsz liczbę sztuk':'Reducir cantidad','Zwiększ liczbę sztuk':'Aumentar cantidad',
 'Dodatkowe usługi':'Servicios adicionales','Montaż stacyjki':'Instalación de contacto con llave','Dodatkowe doszczelnienie':'Sellado adicional','Montaż GPS':'Instalación de GPS','Montaż wideorejestratora':'Instalación de cámara','Montaż alarmu':'Instalación de alarma','NAJCZĘŚCIEJ WYBIERANE':'MÁS ELEGIDO',
@@ -202,7 +196,7 @@ const translations={
 'Czy mogę dokupić części i skorzystać z serwisu?':'¿Puedo comprar recambios y utilizar el servicio técnico?','Tak, sklep oferuje części zamienne oraz obsługę serwisową. Dostępność konkretnej części i termin realizacji potwierdzisz z obsługą.':'Sí, la tienda ofrece recambios y servicio técnico. Consulta con atención al cliente la disponibilidad de las piezas y los plazos.',
 'Jak przygotować hulajnogę do pierwszej jazdy?':'¿Cómo preparar el patinete antes del primer uso?','Zapoznaj się z instrukcją, sprawdź mocowania, hamulce i ciśnienie w oponach oraz naładuj akumulator zgodnie z zaleceniami producenta.':'Lee el manual, revisa las fijaciones, los frenos y la presión de los neumáticos, y carga la batería siguiendo las instrucciones del fabricante.',
 'Pobierz instrukcję (8Mb)':'Descargar manual (8 MB)','Udostępnij':'Compartir','Może Ci się spodobać':'También te puede gustar','Hulajnoga elektryczna':'Patinete eléctrico','ZOBACZ PRODUKT':'VER PRODUCTO','Szybki zakup':'Compra rápida','Dodaj do koszyka':'Añadir al carrito','Powiadom mnie o dostępności':'Avísame cuando esté disponible','Kup w przedsprzedaży':'Comprar en preventa',
-'Powiększ podgląd':'Ampliar imagen','Zamknij podgląd':'Cerrar imagen','Powiększone zdjęcie produktu':'Imagen ampliada del producto','Najedź na zdjęcie, aby powiększyć. Na telefonie użyj dwóch palców.':'Pasa el cursor por la imagen para ampliarla. En el móvil utiliza dos dedos.','Resetuj powiększenie':'Restablecer zoom','Najważniejsze cechy produktu':'Características principales','Otwórz menu':'Abrir menú','Zamknij menu':'Cerrar menú','Kategorie':'Categorías','Szukaj':'Buscar','Porównaj':'Comparar','Ulubione':'Favoritos','Konto':'Mi cuenta','Koszyk':'Carrito','Następne zdjęcia':'Fotos siguientes','Poprzednie zdjęcia':'Fotos anteriores','Pokaż pierwsze zdjęcia':'Mostrar las primeras fotos','Pokaż kolejne zdjęcia':'Mostrar más fotos',
+'Powiększ zdjęcie':'Ampliar imagen','Powiększ podgląd':'Ampliar imagen','Zamknij podgląd':'Cerrar imagen','Powiększone zdjęcie produktu':'Imagen ampliada del producto','Najedź na zdjęcie, aby powiększyć. Na telefonie użyj dwóch palców.':'Pasa el cursor por la imagen para ampliarla. En el móvil utiliza dos dedos.','Resetuj powiększenie':'Restablecer zoom','Najważniejsze cechy produktu':'Características principales','Otwórz menu':'Abrir menú','Zamknij menu':'Cerrar menú','Kategorie':'Categorías','Szukaj':'Buscar','Porównaj':'Comparar','Ulubione':'Favoritos','Konto':'Mi cuenta','Koszyk':'Carrito','Następne zdjęcia':'Fotos siguientes','Poprzednie zdjęcia':'Fotos anteriores','Pokaż pierwsze zdjęcia':'Mostrar las primeras fotos','Pokaż kolejne zdjęcia':'Mostrar más fotos',
 'Podgląd projektu — ta akcja nie jest jeszcze podłączona.':'Vista previa: esta acción todavía no está conectada.','Podgląd projektu - ta akcja nie jest jeszcze podłączona.':'Vista previa: esta acción todavía no está conectada.'
 };
 const originalText=new WeakMap(),originalAttributes=new WeakMap();
@@ -215,10 +209,34 @@ function spanish(text){let result=text;const prefix=result.match(/^(\d+\.\s*)(.*
 }
 let translating=false,translationQueued=false;
 function translatePage(){if(translating)return;translating=true;const isSpanish=selectedVariant==='es';const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let node;while(node=walker.nextNode()){
- if(['SCRIPT','STYLE'].includes(node.parentElement?.tagName)||node.parentElement?.closest('#variant-picker,.variant-launcher'))continue;let original=originalText.get(node);if(original===undefined){original=node.nodeValue;originalText.set(node,original);}const raw=original.trim();const translated=isSpanish?original.replace(raw,spanish(raw)):original;if(node.nodeValue!==translated)node.nodeValue=translated;
+ if(['SCRIPT','STYLE'].includes(node.parentElement?.tagName)||node.parentElement?.closest('#variant-picker,.variant-launcher,.payment-logo,.payu-wordmark'))continue;let original=originalText.get(node);if(original===undefined){original=node.nodeValue;originalText.set(node,original);}const raw=original.trim();const translated=isSpanish?original.replace(raw,spanish(raw)):original;if(node.nodeValue!==translated)node.nodeValue=translated;
  }
  document.querySelectorAll('[aria-label],[alt],[title]').forEach(el=>{if(el.closest('#variant-picker,.variant-launcher'))return;let originals=originalAttributes.get(el);if(!originals){originals={};originalAttributes.set(el,originals);}for(const attr of ['aria-label','alt','title']){if(!el.hasAttribute(attr))continue;if(!(attr in originals)||(el.getAttribute(attr)!==originals[attr]&&el.getAttribute(attr)!==spanish(originals[attr])))originals[attr]=el.getAttribute(attr);const value=isSpanish?spanish(originals[attr]):originals[attr];if(el.getAttribute(attr)!==value)el.setAttribute(attr,value);}});
  document.title='Kamikaze K1 Plus Nightmare | 7way';translating=false;
 }
 new MutationObserver(()=>{if(translationQueued)return;translationQueued=true;queueMicrotask(()=>{translationQueued=false;translatePage();});}).observe(document.body,{childList:true,characterData:true,subtree:true});
 applyPreviewVariant('new');
+function productActionMessage(message){const toast=document.querySelector('.toast');toast.textContent=message;toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),2500);}
+function toggleProductAction(button,activeLabel,inactiveLabel,key){const active=button.getAttribute('aria-pressed')!=='true';button.setAttribute('aria-pressed',String(active));button.querySelector('span').textContent=active?activeLabel:inactiveLabel;try{localStorage.setItem(key,JSON.stringify(active));}catch{}return active;}
+const saveButton=document.querySelector('.save-product');
+try{if(JSON.parse(localStorage.getItem('7way.saved.k1plus')||'false')){saveButton.setAttribute('aria-pressed','true');saveButton.querySelector('span').textContent='Zapisano';}}catch{}
+saveButton.addEventListener('click',()=>{const saved=toggleProductAction(saveButton,'Zapisano','Zapisz','7way.saved.k1plus');productActionMessage(saved?'Zapisano produkt.':'Usunięto z zapisanych.');});
+document.querySelector('.compare-product').addEventListener('click',e=>{const selected=toggleProductAction(e.currentTarget,'W porównaniu','Porównaj','7way.compare.k1plus');productActionMessage(selected?'Dodano do porównania.':'Usunięto z porównania.');});
+document.querySelectorAll('.share-product').forEach(button=>button.addEventListener('click',async()=>{if(location.protocol==='file:'){productActionMessage('Udostępnianie linku jest dostępne po uruchomieniu strony na serwerze.');return;}try{if(navigator.share){await navigator.share({title:document.title,url:location.href});}else if(navigator.clipboard){await navigator.clipboard.writeText(location.href);productActionMessage('Skopiowano link do produktu.');}else productActionMessage('Udostępnianie linku jest dostępne po uruchomieniu strony na serwerze.');}catch(error){if(error.name!=='AbortError')productActionMessage('Udostępnianie linku jest dostępne po uruchomieniu strony na serwerze.');}}));
+
+// Demonstration copy only: replace with genuine review data before publishing.
+const reviewExamples=[
+{user:'MiejskiPodroznik',pl:['Wygodnie na codziennych trasach','Bardzo przyjemnie korzysta mi się z tego modelu na co dzień. Doceniam wygodę jazdy i staranne wykończenie.'],es:['Cómodo para el día a día','Me resulta muy agradable utilizar este modelo a diario. Valoro la comodidad y el cuidado de los acabados.']},
+{user:'Kamil_R',pl:['Udany wybór','Wygląd na żywo zrobił na mnie świetne wrażenie. Całość prezentuje się solidnie i daje dużo przyjemności z jazdy.'],es:['Una buena elección','Su aspecto en persona me ha causado una gran impresión. Se ve sólido y resulta muy agradable de conducir.']},
+{user:'AniaNaTrasie',pl:['Przemyślany model','Najbardziej podoba mi się wygodna pozycja i prostota obsługi. Chętnie wybieram go na krótsze wyjazdy.'],es:['Un modelo bien pensado','Lo que más me gusta es la posición cómoda y la facilidad de uso. Me encanta elegirlo para trayectos cortos.']},
+{user:'Pawel_M',pl:['Świetne pierwsze wrażenie','Dobre wykonanie i dopracowane detale. Od pierwszej przejażdżki korzystanie z tego pojazdu sprawia mi dużo frajdy.'],es:['Una primera impresión excelente','Buena fabricación y detalles cuidados. Desde el primer paseo, disfrutar de este vehículo me resulta muy divertido.']},
+{user:'NaDwochKolach',pl:['Chętnie wracam na trasę','To model, po który po prostu chce się sięgać. Podoba mi się jego stylistyka i to, jak przyjemnie się nim podróżuje.'],es:['Siempre apetece volver a salir','Es un modelo que apetece utilizar. Me gusta su diseño y lo agradable que resulta desplazarse con él.']}
+];
+let reviewIndex=0,reviewTimer,reviewHover=false;
+const reviewPanel=document.querySelector('.customer-reviews');
+function showReview(index){reviewIndex=(index+reviewExamples.length)%reviewExamples.length;const review=reviewExamples[reviewIndex],copy=review[selectedVariant==='es'?'es':'pl'];document.querySelector('.review-heading').textContent=copy[0];document.querySelector('.review-text').textContent=copy[1];document.querySelector('.review-username').textContent=review.user;document.querySelector('.review-avatar').textContent=review.user.slice(0,1);document.querySelector('.review-count').textContent=`${reviewIndex+1} / ${reviewExamples.length}`;const card=document.querySelector('.review-card');card.classList.remove('review-enter');requestAnimationFrame(()=>card.classList.add('review-enter'));}
+function pauseReviews(){clearInterval(reviewTimer);reviewTimer=null;}
+function resumeReviews(){pauseReviews();if(document.hidden||reviewHover||reviewPanel.contains(document.activeElement)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;reviewTimer=setInterval(()=>showReview(reviewIndex+1),7000);}
+reviewPanel.addEventListener('mouseenter',()=>{reviewHover=true;pauseReviews();});reviewPanel.addEventListener('mouseleave',()=>{reviewHover=false;resumeReviews();});reviewPanel.addEventListener('focusin',pauseReviews);reviewPanel.addEventListener('focusout',()=>setTimeout(resumeReviews,0));
+document.querySelector('.review-previous').addEventListener('click',()=>{showReview(reviewIndex-1);resumeReviews();});document.querySelector('.review-next').addEventListener('click',()=>{showReview(reviewIndex+1);resumeReviews();});
+let reviewTouchX=null;reviewPanel.addEventListener('touchstart',e=>{reviewTouchX=e.touches[0].clientX;pauseReviews();},{passive:true});reviewPanel.addEventListener('touchend',e=>{if(reviewTouchX!==null){const dx=e.changedTouches[0].clientX-reviewTouchX;if(Math.abs(dx)>45)showReview(reviewIndex+(dx<0?1:-1));}reviewTouchX=null;reviewHover=false;resumeReviews();},{passive:true});document.addEventListener('visibilitychange',resumeReviews);document.addEventListener('productlanguagechange',()=>showReview(reviewIndex));showReview(0);resumeReviews();
