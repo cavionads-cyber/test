@@ -13,7 +13,7 @@ const services=[
 document.querySelector('#services').innerHTML=services.map(([name,price,file,description,popular],i)=>`<div class="service-row"><label class="option"><input type="checkbox" data-price="${price}" aria-label="${name}"><img class="option-image" src="img/${file}.png" alt="" width="600" height="600"><span><strong>${name}</strong>${popular?'<span class="popular">NAJCZĘŚCIEJ WYBIERANE</span>':''}<em>${money(price)}</em></span></label><span class="service-help"><button type="button" aria-label="Informacje: ${name}" aria-describedby="service-help-${i}">?</button><span class="service-tooltip" role="tooltip" id="service-help-${i}">${description}</span></span></div>`).join('');
 const accessoryItems=[['Kask szczękowy Kamikaze RONIN',349,'akcesorium-kask-ronin'],['Zestaw czyszczący Mr. Motus Box',69.99,'akcesorium-zestaw-czyszczacy'],['Uchwyt na telefon PRO RUPTOR',49,'akcesorium-uchwyt-na-telefon'],['Zapięcie do hulajnogi',null,'akcesorium-zapiecie'],['Rękawice do jazdy',null,'akcesorium-rekawice']];
 document.querySelector('#accessories').innerHTML=accessoryItems.map(([name,price,file])=>`<article class="accessory"><img src="img/${file}.png" alt="${name}" width="600" height="600"><p>${name}</p><strong>${price===null?'Cena wkrótce':money(price)}</strong><button aria-label="Dodaj: ${name}" aria-pressed="false" data-price="${price||0}">DODAJ</button></article>`).join('')+'<article class="accessory accessory-more"><button class="demo-action"><span aria-hidden="true">+</span>Zobacz więcej</button></article>';
-const faqItems=[['Ile trwa gwarancja?','Gwarancja wynosi 24 miesiące. Szczegółowy zakres ochrony oraz warunki znajdują się w dokumencie gwarancyjnym.'],['Czy hulajnoga jest legalna w Polsce?','Możliwość korzystania z hulajnogi na drogach publicznych zależy od zgodności konkretnej wersji pojazdu z obowiązującymi wymaganiami oraz od uprawnień użytkownika. Przed zakupem potwierdź z obsługą sklepu zgodność wybranego wariantu.'],['Jak szybko zamówienie zostanie wysłane?','Wysyłka produktów dostępnych w magazynie jest planowana w ciągu 48 godzin. Usługi dodatkowe mogą wydłużyć czas przygotowania zamówienia.'],['Czy mogę dokupić części i skorzystać z serwisu?','Tak, sklep oferuje części zamienne oraz obsługę serwisową. Dostępność konkretnej części i termin realizacji potwierdzisz z obsługą.'],['Jak przygotować hulajnogę do pierwszej jazdy?','Zapoznaj się z instrukcją, sprawdź mocowania, hamulce i ciśnienie w oponach oraz naładuj akumulator zgodnie z zaleceniami producenta.']];
+const faqItems=[["Jaki zasięg oferuje Kamikaze K1 Plus Nightmare?", "Deklarowany zasięg to do 80 km. Rzeczywisty wynik zależy między innymi od obciążenia, prędkości, temperatury, ciśnienia w oponach i ukształtowania trasy."], ["Jaki silnik i akumulator ma ten model?", "Model wyposażono w silnik o mocy nominalnej 1000 W oraz akumulator 48 V 20 Ah. Koła mają bezdętkowe opony o średnicy 10 cali."], ["Ile trwa gwarancja?", "Dla tego modelu podajemy 24 miesiące gwarancji. Jej szczegółowy zakres, wyłączenia i sposób zgłoszenia opisuje dokument gwarancyjny dołączony do produktu."], ["Kiedy otrzymam zamówienie?", "Dla produktów dostępnych podajemy wysyłkę w 48 godzin; czas doręczenia zależy od przewoźnika. W przedsprzedaży wysyłka rozpoczyna się od 01.01.2027. Montaż wybranych dodatków może wydłużyć przygotowanie zamówienia."], ["Czy można dokupić części i usługi montażu?", "Tak — dostępne dodatki wybierzesz w sekcjach „Dodatkowe usługi” i „Uzupełnij swój zestaw”. Wybrane pozycje zobaczysz w rozwijanym podsumowaniu przy koszyku. W sprawie części i serwisu skontaktuj się z obsługą sklepu."]];
 document.querySelector('#faq').innerHTML=faqItems.map(([q,answer],i)=>`<details><summary>${i+1}. ${q}</summary><p>${answer}</p></details>`).join('');
 const photos=Array.from({length:10},(_,i)=>`img/kamikaze-k1-plus-nightmare-${String(i+1).padStart(2,'0')}.png`);
 const videos=['opVMHShXKnc','J4WT-T7HzX4','DPQ8Qy2-2hw','yBb76qG_hwM','n9o2A5eVcOE'];
@@ -91,7 +91,7 @@ function updateTotal(){refreshVariantPurchase();}
 document.querySelector('#increase').addEventListener('click',()=>{quantity.value=Number(quantity.value)+1;normalize();});
 document.querySelector('#decrease').addEventListener('click',()=>{quantity.value=Number(quantity.value)-1;normalize();});quantity.addEventListener('change',normalize);
 document.querySelectorAll('.option input').forEach(c=>c.addEventListener('change',updateTotal));
-document.querySelectorAll('.accessory button[data-price]').forEach(b=>b.addEventListener('click',()=>{const selected=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(selected));b.textContent=selected?'DODANO ✓':'DODAJ';updateTotal();}));
+document.querySelectorAll('.accessory button[data-price]').forEach(b=>b.addEventListener('click',()=>{const selected=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(selected));b.textContent=selected?'USUŃ':'DODAJ';b.closest('.accessory').classList.toggle('accessory-selected',selected);b.setAttribute('aria-label',(selected?'Usuń: ':'Dodaj: ')+b.closest('.accessory').querySelector('p').textContent);updateTotal();}));
 const dialog=document.querySelector('#preview');document.querySelector('.expand').addEventListener('click',()=>dialog.showModal());document.querySelector('.close-preview').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
 let toastTimer;document.querySelectorAll('.cart-button,.text-button,.product-footer button:not(.share-product),.header nav button,.header-tools .desktop-tool,.header-tools button[aria-label="Szukaj"]').forEach(b=>b.addEventListener('click',()=>{const toast=document.querySelector('.toast');toast.textContent='Podgląd projektu — ta akcja nie jest jeszcze podłączona.';toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),2400);}));
 
@@ -99,7 +99,7 @@ const carousel=document.querySelector('#accessories');
 function moveAccessories(direction){const card=carousel.querySelector('.accessory');carousel.scrollBy({left:direction*(card.getBoundingClientRect().width+8)*3,behavior:'smooth'});}
 document.querySelector('.next-accessories').addEventListener('click',()=>moveAccessories(1));document.querySelector('.previous-accessories').addEventListener('click',()=>moveAccessories(-1));
 function updateAccessoryArrows(){document.querySelector('.previous-accessories').disabled=carousel.scrollLeft<2;document.querySelector('.next-accessories').disabled=carousel.scrollLeft>=carousel.scrollWidth-carousel.clientWidth-2;}carousel.addEventListener('scroll',updateAccessoryArrows,{passive:true});window.addEventListener('resize',updateAccessoryArrows);requestAnimationFrame(updateAccessoryArrows);
-const floating=document.querySelector('.floating-purchase');const cartButton=document.querySelector('.cart-button');function updateFloating(){floating.hidden=matchMedia('(max-width:850px)').matches?false:cartButton.getBoundingClientRect().bottom>=0;const totalText=money(configuredTotal()).replace('zł',selectedVariant==='es'?'PLN':'zł');if(document.querySelector('.floating-price').textContent!==totalText)document.querySelector('.floating-price').textContent=totalText;}window.addEventListener('scroll',updateFloating,{passive:true});window.addEventListener('resize',updateFloating);new MutationObserver(updateFloating).observe(cartButton,{childList:true,characterData:true,subtree:true});updateFloating();
+const floating=document.querySelector('.floating-purchase');const cartButton=document.querySelector('.cart-button');function updateFloating(){syncFloatingExtras();floating.hidden=matchMedia('(max-width:850px)').matches?false:cartButton.getBoundingClientRect().bottom>=0;const totalText=money(configuredTotal()).replace('zł',selectedVariant==='es'?'PLN':'zł');if(document.querySelector('.floating-price').textContent!==totalText)document.querySelector('.floating-price').textContent=totalText;}window.addEventListener('scroll',updateFloating,{passive:true});window.addEventListener('resize',updateFloating);new MutationObserver(updateFloating).observe(cartButton,{childList:true,characterData:true,subtree:true});updateFloating();
 document.querySelectorAll('.demo-action:not(.share-product)').forEach(b=>b.addEventListener('click',()=>{const toast=document.querySelector('.toast');toast.textContent='Podgląd projektu — ta akcja nie jest jeszcze podłączona.';toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),2400);}));
 document.querySelectorAll('.service-help button').forEach(button=>button.addEventListener('click',()=>{const parent=button.parentElement;const open=parent.classList.toggle('help-open');button.setAttribute('aria-expanded',String(open));}));
 
@@ -144,6 +144,7 @@ function refreshVariantPurchase(){
  if(buy.textContent!==caption)buy.textContent=caption;
  buy.classList.toggle('preorder-purchase',selectedVariant==='preorder');
  document.querySelector('.quantity').hidden=selectedVariant==='unavailable';
+ const unavailable=selectedVariant==='unavailable';document.querySelector('.availability-form').hidden=!unavailable;document.querySelectorAll('.availability-form input').forEach(input=>input.disabled=!unavailable);
  document.querySelector('.payment-methods').hidden=selectedVariant==='unavailable';
  document.querySelector('.preorder-shipping').hidden=selectedVariant!=='preorder';
  document.querySelector('.installments').hidden=selectedVariant==='unavailable';
@@ -155,25 +156,57 @@ function refreshVariantPurchase(){
  document.querySelector('.mobile-cart-label').textContent=selectedVariant==='unavailable'?'Powiadom o dostępności':selectedVariant==='preorder'?'Kup w przedsprzedaży':'Dodaj do koszyka';
  updateFloating();
 }
+const recommendations=document.querySelector('.recommendations');
+const recommendationsHome=document.createComment('recommendations-original-position');
+recommendations.before(recommendationsHome);
+const recommendationsTitle=recommendations.querySelector('h2');
+const originalRecommendationsTitle=recommendationsTitle.textContent;
+const unavailableSections=[document.querySelector('.services-section'),document.querySelector('.bundle')];
+let savedSectionStates=null;
+function updateUnavailableLayout(unavailable){
+ document.querySelector('.additional-info').hidden=unavailable;
+ if(unavailable&&!savedSectionStates){
+  savedSectionStates=unavailableSections.map(section=>section.open);
+  unavailableSections.forEach(section=>{
+   section.open=false;section.classList.add('unavailable-section');
+   section.querySelector('summary').setAttribute('aria-disabled','true');
+   section.inert=true;
+  });
+ }else if(!unavailable&&savedSectionStates){
+  unavailableSections.forEach((section,index)=>{
+   section.open=savedSectionStates[index];section.classList.remove('unavailable-section');
+   section.querySelector('summary').removeAttribute('aria-disabled');section.inert=false;
+  });savedSectionStates=null;
+ }
+ recommendations.classList.toggle('alternative-products',unavailable);
+ recommendationsTitle.textContent=unavailable?'Sprawdź inne produkty':originalRecommendationsTitle;
+ if(unavailable)document.querySelector('.configuration-column').append(recommendations);
+ else recommendationsHome.after(recommendations);
+}
 function applyPreviewVariant(value){
  selectedVariant=value;document.documentElement.lang=value==='es'?'es':'pl';document.body.dataset.previewVariant=value;
  const badge=document.querySelector('.new');badge.querySelector('.status-label').textContent=variantLabels[value];
  const help=document.querySelector('.status-help');help.hidden=!['outlet','preorder'].includes(value);
  document.querySelector('.status-tooltip').textContent=value==='preorder'?variantPreviewConfig.shippingDate:variantPreviewConfig.outletCondition;
  document.querySelector('.dgt-info').hidden=value!=='es';
+ document.querySelector('.outlet-info').hidden=value!=='outlet';
+ updateUnavailableLayout(value==='unavailable');
  document.querySelectorAll('[data-preview-variant]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.previewVariant===value)));
  refreshVariantPurchase();translatePage();document.dispatchEvent(new Event('productlanguagechange'));variantPanel.close();
 }
 document.querySelectorAll('[data-preview-variant]').forEach(button=>button.addEventListener('click',()=>applyPreviewVariant(button.dataset.previewVariant)));
 document.querySelector('.status-help button').addEventListener('click',()=>document.querySelector('.status-help').classList.toggle('help-open'));
 const translations={
+"Jaki zasięg oferuje Kamikaze K1 Plus Nightmare?":"¿Qué autonomía ofrece el Kamikaze K1 Plus Nightmare?","Deklarowany zasięg to do 80 km. Rzeczywisty wynik zależy między innymi od obciążenia, prędkości, temperatury, ciśnienia w oponach i ukształtowania trasy.":"La autonomía declarada es de hasta 80 km. La autonomía real depende de la carga, la velocidad, la temperatura, la presión de los neumáticos y el terreno.","Jaki silnik i akumulator ma ten model?":"¿Qué motor y batería incorpora este modelo?","Model wyposażono w silnik o mocy nominalnej 1000 W oraz akumulator 48 V 20 Ah. Koła mają bezdętkowe opony o średnicy 10 cali.":"Incorpora un motor de potencia nominal de 1000 W, una batería de 48 V y 20 Ah y neumáticos sin cámara de 10 pulgadas.","Ile trwa gwarancja?":"¿Cuánto dura la garantía?","Dla tego modelu podajemy 24 miesiące gwarancji. Jej szczegółowy zakres, wyłączenia i sposób zgłoszenia opisuje dokument gwarancyjny dołączony do produktu.":"Para este modelo se indican 24 meses de garantía. La cobertura, las exclusiones y el procedimiento de solicitud se detallan en el documento de garantía incluido con el producto.","Kiedy otrzymam zamówienie?":"¿Cuándo recibiré mi pedido?","Dla produktów dostępnych podajemy wysyłkę w 48 godzin; czas doręczenia zależy od przewoźnika. W przedsprzedaży wysyłka rozpoczyna się od 01.01.2027. Montaż wybranych dodatków może wydłużyć przygotowanie zamówienia.":"Los productos disponibles se expiden en 48 horas; el plazo de entrega depende del transportista. En preventa, los envíos comienzan a partir del 01.01.2027. El montaje de extras puede alargar la preparación.","Czy można dokupić części i usługi montażu?":"¿Se pueden comprar recambios y servicios de montaje?","Tak — dostępne dodatki wybierzesz w sekcjach „Dodatkowe usługi” i „Uzupełnij swój zestaw”. Wybrane pozycje zobaczysz w rozwijanym podsumowaniu przy koszyku. W sprawie części i serwisu skontaktuj się z obsługą sklepu.":"Sí. Puedes seleccionar los extras en «Servicios adicionales» y «Completa tu equipo». Los artículos seleccionados aparecen en el resumen desplegable junto al carrito. Para recambios y servicio técnico, contacta con la tienda.",
+ 'Wybierz wariant':'Elige tu variante','USUŃ':'QUITAR','Dodatki':'Extras','Wybrane dodatki':'Extras seleccionados',
+ 'Hulajnoga elektryczna z silnikiem 1000 W, baterią 48 V 20 Ah i bezdętkowymi oponami 10″.':'Patinete eléctrico con motor de 1000 W, batería de 48 V y 20 Ah y neumáticos sin cámara de 10 pulgadas.',
 'Opinie przykładowe':'Opiniones de ejemplo',
 
 'Opinie klientów':'Opiniones de clientes','Przykładowe opinie do podglądu — treści wygenerowane, nie pochodzą z TrustMate.':'Opiniones de ejemplo para la vista previa: textos generados, no proceden de TrustMate.','Poprzednia opinia':'Opinión anterior','Następna opinia':'Opinión siguiente',
 
 'Opcje produktu':'Opciones del producto','Zapisz':'Guardar','Zapisano':'Guardado','W porównaniu':'En la comparación','Dodano do porównania.':'Añadido a la comparación.','Usunięto z porównania.':'Eliminado de la comparación.','Zapisano produkt.':'Producto guardado.','Usunięto z zapisanych.':'Producto eliminado de los guardados.','Skopiowano link do produktu.':'Enlace del producto copiado.','Udostępnianie linku jest dostępne po uruchomieniu strony na serwerze.':'El enlace se puede compartir cuando la página se ejecute en un servidor.','lub':'o','× 30 rat':'× 30 cuotas',
 
-'Wybierz swój model':'Elige tu modelo','Wybrany model':'Modelo seleccionado','Wygodnie na raty z':'Paga a plazos con','Rozłóż płatność na raty. Warunki dostępne przy wyborze płatności.':'Fracciona tu pago. Consulta las condiciones al elegir el método de pago.','Wygodne i bezpieczne płatności':'Pagos cómodos y seguros',
+'Wybierz wariant':'Elige tu variante','Wybrany model':'Modelo seleccionado','Wygodnie na raty z':'Paga a plazos con','Rozłóż płatność na raty. Warunki dostępne przy wyborze płatności.':'Fracciona tu pago. Consulta las condiciones al elegir el método de pago.','Wygodne i bezpieczne płatności':'Pagos cómodos y seguros',
 
 'Powiadom o dostępności':'Avísame cuando esté disponible','Zakup produktu':'Comprar producto','Pomoc i informacje':'Ayuda e información','Wybierz wariant':'Elegir variante','Zmień wariant':'Cambiar variante','Wariant podglądu':'Variante de vista previa','Zamknij wybór wariantu':'Cerrar selector de variantes','Nowość':'Novedad','Outlet':'Outlet','Przedsprzedaż':'Preventa','Brak na stanie':'Agotado',
 'Hulajnogi elektryczne':'Patinetes eléctricos','Hulajnogi Elektryczne':'Patinetes eléctricos','Pojazdy':'Vehículos','Bestsellery':'Más vendidos','Części':'Recambios','Akcesoria':'Accesorios','Usługi':'Servicios','Smart home':'Hogar inteligente',
@@ -240,3 +273,47 @@ function resumeReviews(){pauseReviews();if(document.hidden||reviewHover||reviewP
 reviewPanel.addEventListener('mouseenter',()=>{reviewHover=true;pauseReviews();});reviewPanel.addEventListener('mouseleave',()=>{reviewHover=false;resumeReviews();});reviewPanel.addEventListener('focusin',pauseReviews);reviewPanel.addEventListener('focusout',()=>setTimeout(resumeReviews,0));
 document.querySelector('.review-previous').addEventListener('click',()=>{showReview(reviewIndex-1);resumeReviews();});document.querySelector('.review-next').addEventListener('click',()=>{showReview(reviewIndex+1);resumeReviews();});
 let reviewTouchX=null;reviewPanel.addEventListener('touchstart',e=>{reviewTouchX=e.touches[0].clientX;pauseReviews();},{passive:true});reviewPanel.addEventListener('touchend',e=>{if(reviewTouchX!==null){const dx=e.changedTouches[0].clientX-reviewTouchX;if(Math.abs(dx)>45)showReview(reviewIndex+(dx<0?1:-1));}reviewTouchX=null;reviewHover=false;resumeReviews();},{passive:true});document.addEventListener('visibilitychange',resumeReviews);document.addEventListener('productlanguagechange',()=>showReview(reviewIndex));showReview(0);resumeReviews();
+
+// Text-only summary mirrors the selected services and accessories.
+var extrasSignature;
+function syncFloatingExtras(){
+ const toggle=document.querySelector('.floating-extras-toggle'),panel=document.querySelector('#floating-extras');
+ if(!toggle||!panel)return;
+ const items=[...document.querySelectorAll('.option input:checked')].map(input=>({name:input.closest('.option').querySelector('strong').textContent,price:Number(input.dataset.price)}))
+  .concat([...document.querySelectorAll('.accessory button[data-price][aria-pressed="true"]')].map(button=>({name:button.closest('.accessory').querySelector('p').textContent,price:Number(button.dataset.price)})));
+ const signature=JSON.stringify([selectedVariant,items]);
+ if(signature===extrasSignature)return;extrasSignature=signature;
+ toggle.hidden=!items.length||selectedVariant==='unavailable';
+ toggle.querySelector('.extras-label').textContent=(selectedVariant==='es'?'Extras':'Dodatki')+' ('+items.length+')';
+ const list=panel.querySelector('ul');list.replaceChildren(...items.map(item=>{const li=document.createElement('li'),name=document.createElement('span'),price=document.createElement('strong');name.textContent=item.name;price.textContent=money(item.price);li.append(name,price);return li;}));
+ if(toggle.hidden)setFloatingExtrasOpen(false);
+}
+document.querySelector('.floating-extras-toggle').addEventListener('click',()=>{
+ const button=document.querySelector('.floating-extras-toggle'),panel=document.querySelector('#floating-extras');
+ const open=button.getAttribute('aria-expanded')!=='true';setFloatingExtrasOpen(open);
+});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'){setFloatingExtrasOpen(false);}});
+syncFloatingExtras();
+
+function setFloatingExtrasOpen(open){
+ const card=document.querySelector('.floating-purchase'),panel=document.querySelector('#floating-extras'),button=document.querySelector('.floating-extras-toggle');
+ button.setAttribute('aria-expanded',String(open));panel.setAttribute('aria-hidden',String(!open));panel.inert=!open;card.classList.toggle('extras-open',open);
+}
+
+// Local prototype: validate the address without transmitting personal data.
+document.querySelector('.cart-button').addEventListener('click',event=>{
+ if(selectedVariant!=='unavailable')return;
+ event.preventDefault();event.stopImmediatePropagation();
+ const email=document.querySelector('#availability-email');
+ if(!email.reportValidity())return;
+ productActionMessage('Podgląd projektu — zapis powiadomienia wymaga podłączenia do sklepu.');
+},true);
+document.querySelector('.floating-cart').addEventListener('click',event=>{
+ if(selectedVariant!=='unavailable')return;
+ event.preventDefault();event.stopImmediatePropagation();
+ document.querySelector('.availability-form').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+ document.querySelector('#availability-email').focus({preventScroll:true});
+},true);
+document.querySelector('.privacy-link').addEventListener('click',event=>{
+ event.preventDefault();productActionMessage('Odnośnik do polityki prywatności zostanie podłączony do strony sklepu.');
+});

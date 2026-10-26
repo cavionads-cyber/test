@@ -185,3 +185,102 @@ body{font-size:15px;line-height:1.6}.breadcrumbs{font-size:12px;color:#626872}.h
 @media(min-width:851px) and (max-width:1180px){.header-inner{padding-inline:25px}}
 @media(max-width:850px){.header-inner{max-width:600px;margin-inline:auto;padding-inline:18px}}
 @media(max-width:370px){.header-inner{padding-inline:15px}}
+
+/* Compact title and USP rows, with natural wrapping at smaller widths. */
+.container>.product-heading{margin-bottom:22px}
+.heading-main{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.container>.product-heading .product-badges{margin:0;flex-shrink:0}
+.heading-main .product-title-row{margin:0;min-width:0}
+.container>.product-heading h1{margin:0;line-height:1.25}
+.heading-meta{display:flex;align-items:center;gap:18px;margin-top:10px;flex-wrap:wrap}
+.container>.product-heading .rating{margin:0;flex-shrink:0}
+.heading-meta .product-usp{font-size:14px;line-height:1.65;color:#59616b;flex:1;min-width:240px}
+.outlet-info{border:1px solid #edc6c6;border-radius:var(--card-radius);background:#fff4f4;padding:18px;color:#6b2929}
+.outlet-info h2{font-size:15px;margin:0 0 10px;color:#a91f1f}
+.outlet-info p{font-size:13px;line-height:1.7;margin-top:7px}
+.outlet-info[hidden],.additional-info[hidden]{display:none!important}
+body[data-preview-variant=unavailable] .main-price,body[data-preview-variant=unavailable] .floating-price{color:#9299a2}
+.configuration-column .unavailable-section{opacity:.5;filter:grayscale(1)}
+.configuration-column .unavailable-section>summary{cursor:default}
+.configuration-column>.alternative-products{border:1px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);padding:18px;margin:0;width:100%;min-width:0}
+.alternative-products h2{font-size:16px;margin:0 0 16px;line-height:1.4}
+.alternative-products .recommendation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;overflow:visible}
+.alternative-products .recommendation{min-width:0;width:auto;padding:10px;flex-basis:auto}
+.alternative-products .recommendation img{width:100%;height:auto;max-height:125px;object-fit:contain;aspect-ratio:1}
+.alternative-products .recommendation h3{font-size:12px;line-height:1.5}
+.alternative-products .recommendation p{font-size:11px;line-height:1.5}
+.alternative-products .recommendation button{font-size:10px;min-height:36px;padding:8px 4px;white-space:normal}
+@media(max-width:850px){
+ .heading-main{gap:10px 13px}.heading-main .product-title-row{width:auto;gap:0}
+ .container>.product-heading .heading-main h1{font-size:23px}
+ .heading-meta{gap:6px 14px;margin-top:10px}.heading-meta .product-usp{font-size:13px;min-width:min(100%,260px)}
+ .configuration-column>.outlet-info{order:4;margin-bottom:20px}
+ .configuration-column>.alternative-products{order:9;margin-top:18px;padding:16px}
+ .alternative-products .recommendation img{max-height:160px}
+}
+
+
+/* Consistent white product surfaces. */
+:root{--card-bg:#fff}
+.purchase-card,.services-section,.customer-reviews,.variant,.recommendation,.accessory,.accessory-more>button,.purchase-card .purchase,.purchase-card .additional-info{background:#fff}
+.product-badges .brand-offer{top:100%;left:0;right:auto;width:100%;max-width:100%;padding:8px;border-radius:0 0 8px 8px;transform:translateY(-6px);transform-origin:top;transition:opacity .25s,transform .25s,visibility .25s;font-style:normal}
+.product-badges .brand:hover .brand-offer,.product-badges .brand:focus-within .brand-offer,.product-badges .brand.brand-open .brand-offer{transform:translateY(0)}
+.brand-offer>img{width:100%;height:auto;aspect-ratio:1;object-fit:contain}
+.brand-offer>button{display:block;width:100%;font-size:11px;line-height:1.5;padding:9px 2px;font-style:normal;font-weight:700;text-transform:uppercase;border-radius:5px;transition:background .2s,letter-spacing .2s}
+.brand-offer>button:hover,.brand-offer>button:focus-visible{background:#d95b00;letter-spacing:.4px}
+.product-support .faq-section>h2{margin:0;padding:20px 0;font-size:15px;font-weight:650;line-height:1.5;text-transform:uppercase}
+.faq-section .product-footer button{border-radius:7px;padding:8px 10px;transition:background .2s,color .2s,transform .2s}
+.faq-section .product-footer button:hover{color:#c45400;background:#fff0e3;transform:translateY(-1px)}
+.faq-section .product-footer button img{transition:transform .2s}.faq-section .product-footer button:hover img{transform:translateY(2px)}
+.accessory{position:relative;transition:border-color .2s,box-shadow .2s}
+.accessory.accessory-selected{border-color:var(--orange);box-shadow:inset 0 0 0 2px var(--orange)}
+.accessory-selected:after{content:'✓';position:absolute;top:8px;right:8px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--orange);color:#fff;font-size:12px;font-weight:700;pointer-events:none}
+.accessory-selected button{background:#e56600}
+.floating-extras-toggle{font-size:12px;font-weight:600;white-space:nowrap;border:1px solid #e3e6e9;border-radius:7px;padding:8px;background:#fff;min-height:38px}
+.floating-extras-toggle:hover{background:#fff1e4;color:#ad4700}
+.floating-extras-toggle[hidden],.floating-extras[hidden]{display:none!important}
+.floating-extras{position:absolute;bottom:calc(100% + 8px);left:0;right:0;max-height:min(50dvh,320px);overflow-y:auto;padding:18px;background:#fff;border:1px solid #e3e6e9;border-radius:12px;box-shadow:0 -6px 24px #17263115;text-align:left}
+.floating-extras h3{margin:0 0 10px;font-size:14px}.floating-extras ul{margin:0;padding-left:20px}.floating-extras li{font-size:13px;line-height:1.7;margin:5px 0;color:#424b55}
+@media(max-width:850px){
+ .floating-purchase{flex-wrap:wrap;row-gap:4px}.floating-extras-toggle{order:5;flex:0 0 100%;padding:3px 8px;min-height:28px;font-size:12px;border:0;border-top:1px solid #e3e6e9;border-radius:0}
+ body:has(.floating-extras-toggle:not([hidden])){padding-bottom:35px}
+ .product-support .faq-section>h2{font-size:14px;padding-block:18px}
+}
+
+/* Reserve a separate row for the extras disclosure on every screen. */
+.floating-purchase{flex-wrap:wrap;row-gap:6px}
+.floating-extras-toggle{order:5;flex:0 0 100%;min-height:30px;padding:4px 8px}
+.floating-purchase .floating-extras{flex:none}
+
+/* Extras expand inside the anchored cart, growing the whole card upward. */
+.floating-purchase .floating-extras{position:static;order:6;flex:0 0 100%;width:100%;max-height:0;min-height:0;overflow:hidden;padding:0;border:0;border-radius:0;box-shadow:none;opacity:0;visibility:hidden;transition:max-height .32s ease,padding .32s ease,opacity .2s ease,visibility .32s}
+.floating-purchase.extras-open .floating-extras{max-height:min(45dvh,360px);padding:12px 0 3px;overflow-y:auto;opacity:1;visibility:visible;border-top:1px solid #e3e6e9}
+.floating-extras ul{list-style:none;padding:0}.floating-extras li{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:0;padding:7px 0;font-size:12px;line-height:1.6}.floating-extras li span{min-width:0}.floating-extras li strong{font-size:12px;font-weight:650;white-space:nowrap}.floating-extras-toggle>span:last-child{display:inline-block;transition:transform .25s}.floating-extras-toggle[aria-expanded=true]>span:last-child{transform:rotate(180deg)}
+/* Keep the selection border outside opaque product images. */
+.accessory.accessory-selected{box-shadow:none;outline:2px solid var(--orange);outline-offset:2px;border-color:transparent}
+.accessories{padding:5px;scroll-padding-inline:5px}
+/* A single continuous orange shape, expanding from the label. */
+.product-badges .brand{font-style:normal;border-radius:7px;transition:border-radius .2s}
+.product-badges .brand-trigger{background:transparent!important;filter:none!important;transform:none!important;border-radius:7px;transition:border-radius .2s}
+.product-badges .brand:hover,.product-badges .brand:focus-within,.product-badges .brand.brand-open{border-radius:7px 7px 0 0}
+.product-badges .brand-offer{top:calc(100% - 1px);padding:0 8px;max-height:0;overflow:hidden;box-shadow:none;border:0;transform:none!important;opacity:0;visibility:hidden;border-radius:0 0 7px 7px;background:var(--orange);transition:max-height .35s ease,padding .35s ease,opacity .2s ease,visibility .35s}
+.product-badges .brand:hover .brand-offer,.product-badges .brand:focus-within .brand-offer,.product-badges .brand.brand-open .brand-offer{max-height:240px;padding:8px;opacity:1;visibility:visible}
+.brand-offer>img{margin:0}.brand-offer>button{margin:0}
+@media(prefers-reduced-motion:reduce){.floating-purchase .floating-extras,.product-badges .brand-offer{transition:none}}
+
+/* One selection tick on the card; never append another to its Remove button. */
+.accessory button[aria-pressed=true]:after{content:none!important;display:none!important}
+.purchase-card .payment-methods,.purchase-card .payment-grid{width:100%;max-width:none}
+.purchase-card .payment-grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.purchase-card .payment-logo{width:100%;max-width:none;height:auto;aspect-ratio:38 / 24}
+.purchase-card .payment-grid svg{display:block;width:100%;height:100%}
+.availability-form{width:100%;margin-bottom:15px;text-align:left}
+.availability-form[hidden]{display:none!important}
+.availability-form>label{display:block;font-size:13px;font-weight:600;line-height:1.5;margin-bottom:8px}
+.availability-form>input{display:block;width:100%;min-height:46px;padding:11px 12px;border:1px solid #cdd3da;border-radius:8px;background:#fff;color:#29323c;font-size:14px}
+.availability-form>input:focus{outline:2px solid var(--orange);outline-offset:2px}
+.availability-form .marketing-consent{display:flex;align-items:flex-start;gap:9px;margin:12px 0 0;font-size:12px;font-weight:400;line-height:1.65;color:#58616b}
+.marketing-consent input{width:18px;height:18px;flex:0 0 18px;margin:3px 0 0;accent-color:var(--orange);cursor:pointer}
+.privacy-link{color:#29323c;font-weight:700;text-decoration:underline;text-underline-offset:3px;transition:color .2s}
+.privacy-link:hover,.privacy-link:focus-visible{color:var(--orange)}
+body[data-preview-variant=unavailable] .purchase-action{display:flex;flex-direction:column;align-items:stretch}
